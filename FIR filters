@@ -1,0 +1,124 @@
+%1.1 LOWPASS
+%%
+%Filter 1: ωcT = 0.3π,  ωsT = 0.4π, δc = 0.01,δs=0.001 => Amax=0.17dB Amin=60.09db
+wT=[0.3 0.4]*pi;
+b=[1 0];
+d=[0.01 0.001];
+fs=2*pi;
+[N, F, D, W]=firpmord(wT, b, d, fs);
+h=firpm(52, F, D, W); %Even order symmetric type 1
+freqz(h);
+%More narrow transistion band when the filter order is higher.
+%ripples minor effect on filter order.
+%%
+%Filter 2: ωcT = 0.3π,  ωsT = 0.4π, δc = 0.001,δs = 0.0001
+wT=[0.3 0.4]*pi;
+b=[1 0];
+d=[0.001 0.0001];
+fs=2*pi;
+[N, F, D, W]=firpmord(wT, b, d, fs);
+h=firpm(N, F, D, W);
+freqz(h);
+%%
+%Filter 3: ωcT = 0.39π, ωsT = 0.4π, δc = 0.01,δs  = 0.001
+wT=[0.39 0.4]*pi;
+b=[1 0];
+d=[0.01 0.001];
+fs=2*pi;
+[N, F, D, W]=firpmord(wT, b, d, fs);
+h=firpm(N, F, D, W);
+freqz(h);
+%%
+%Filter 4: ωcT = 0.69π, ωsT = 0.7π, δc = 0.01,δs  = 0.001
+wT=[0.69 0.7]*pi;
+b=[1 0];
+d=[0.01 0.001];
+fs=2*pi;
+[N, F, D, W]=firpmord(wT, b, d, fs);
+h=firpm(N, F, D, W);
+freqz(h);
+%%
+%1.2
+%Filter 1. Lowpass filter ωcT = 0.4π, ωsT = 0.5π, δc = 0.01, δs = 0.001
+wT=[0.4 0.5]*pi;
+b=[1 0];
+d=[0.01 0.001];
+fs=2*pi;
+[N, F, D, W]=firpmord(wT, b, d, fs);
+h=firpm(53, F, D, W); %Odd order symmetric type 2
+freqz(h);
+%%
+%Filter 2. Highpass filter ωcT = 0.6π, ωsT = 0.5π, δc = 0.01, δs = 0.001
+wT=[0.5 0.6]*pi;
+b=[0 1];
+d=[0.001 0.01];
+fs=2*pi;
+[N, F, D, W]=firpmord(wT, b, d, fs);
+h=firpm(54, F, D, W); %Odd order symmetric type 1. Type 2 can't be used due to Z=-1
+freqz(h)
+%zplane(h);
+%%
+%Filter 3. Bandpass filter ωc1T = 0.4π, ωc2T = 0.6π, ωs1T = 0.3π, ωs2T =
+%0.7π, δc = 0.01 δs = 0.001
+wT=[0.3 0.4 0.6 0.7]*pi;
+b=[0 1 0];
+d=[0.001 0.01 0.001];
+fs=2*pi;
+[N, F, D, W]=firpmord(wT, b, d, fs);
+h=firpm(55, F, D, W); 
+freqz(h)
+%zplane(h);
+%%
+%Filter 4. Bandstop filter ωc1T = 0.3π, ωc2T = 0.7π, ωs1T = 0.4π, ωs2T = 0.6π, δc = 0.01, δs = 0.001
+wT=[0.3 0.4 0.6 0.7]*pi;
+b=[1 0 1];
+d=[0.01 0.001 0.01];
+fs=2*pi;
+[N, F, D, W]=firpmord(wT, b, d, fs);
+h=firpm(N, F, D, W); 
+freqz(h)
+%zplane(h);
+
+
+%%
+wcT=0.4*pi; wsT=0.5*pi; dc=0.05; ds=0.01;
+t=1;
+N=32;
+M=N/2+1;
+m=1:M;
+Kp=500; Ks=500;
+wT=[linspace(0, wcT, Kp) linspace(wsT, pi, Ks)];
+D=[ones(1,Kp) zeros(1,Ks)];
+W=[ones(1,Kp)/dc ones(1,Ks)/ds];
+A=[trigMat(t, m, wT) -1./W'];
+A=[A' [-trigMat(t,m,wT) -1./W']']';
+b=[D -D]';
+c=[zeros(1,M) 1]';
+x=linprog(c, A, b);
+h=[0.5*fliplr(x(2:M)') x(1) 0.5*x(2:M)'];
+%%
+wcT=0.45*pi; wsT=0.5*pi;
+dc=0.01;
+t=1;
+N=80;
+M=N/2+1;
+m=1:M;
+Kp=200;
+wT=linspace(0, wcT, Kp);
+D=ones(1, Kp);
+efix=dc*ones(1, Kp);
+A=trigMat(1, m, wT);
+A=[A' -trigMat(t,m,wT)']';
+b=[D+efix -D+efix]';
+c=zeros(1, M)';
+S=INT2Mat(t, m, wsT, pi);
+x=quadprog(2*S,c,A,b);
+h=[0.5*fliplr(x(2:M)') x(1) 0.5*x(2:M)'];
+
+
+
+
+
+
+
+
