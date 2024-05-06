@@ -117,7 +117,16 @@ h=[0.5*fliplr(x(2:M)') x(1) 0.5*x(2:M)'];
 
 
 
+%%
+wT_2 = linspace(wsT,pi,1000); % wT axis wsT
 
+
+H_Ws = freqz(f0, wT_2);     % Frequency response wsT
+
+
+Mag_Ws = H_2_MAG(H_Ws);       % Magnitude response wsT
+
+e=sum(abs(Mag_Ws).^2);
 
 
 
